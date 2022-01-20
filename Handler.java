@@ -8,37 +8,33 @@ public class Handler implements Runnable{
     }
 
     public void run() {
-        PrintWriter out = null;
-        BufferedReader in = null;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
         try {
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+            Message request = (Message) objectInputStream.readObject();
+            System.out.println(request.message);
 
-            // get the outputstream of client
-            out = new PrintWriter(
-                    socket.getOutputStream(), true);
+            objectOutputStream.writeObject(new Message("adeus"));
 
-            // get the inputstream of client
-            in = new BufferedReader(
-                    new InputStreamReader(
-                            socket.getInputStream()));
-
-            String line;
-            while ((line = in.readLine()) != null) {
-                out.println(line);
-            }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             try {
-                if (out != null) {
-                    out.close();
-                }
-                if (in != null) {
-                    in.close();
+                if (inputStream != null) {
+                    inputStream.close();
                     socket.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+    }
+
     }
 }

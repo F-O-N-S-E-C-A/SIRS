@@ -1,6 +1,4 @@
-import java.security.PublicKey;
 import java.util.Scanner;
-import java.util.UUID;
 import java.net.*;
 import java.io.*;
 
@@ -29,44 +27,22 @@ public class Car {
         return loc;
     }
 
-    public void connectServer(){
-
+    public void requestProofOfLocation(){
+        Message request = new Message("ola");
         try {
             socket = new Socket("localhost", 2000);
-            // writing to server
-            PrintWriter out = new PrintWriter(
-                    socket.getOutputStream(), true);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
-            // reading from server
-            BufferedReader in
-                    = new BufferedReader(new InputStreamReader(
-                    socket.getInputStream()));
+            objectOutputStream.writeObject(request);
 
-            // object of scanner class
-            Scanner sc = new Scanner(System.in);
-            String line = null;
+            Message response = (Message) objectInputStream.readObject();
+            System.out.println(response.message);
 
-            while (!"exit".equalsIgnoreCase(line)) {
-
-                // reading from user
-                line = sc.nextLine();
-
-                // sending the user input to server
-                out.println(line);
-                out.flush();
-
-                // displaying server reply
-                System.out.println("Server replied "
-                        + in.readLine());
-            }
-
-            // closing the scanner object
-            sc.close();
-        }
-        catch (IOException e) {
+            socket.close();
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+
     }
-
-
 }

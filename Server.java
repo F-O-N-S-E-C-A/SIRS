@@ -15,7 +15,7 @@ public class Server {
         cipherPair = new AsymmetricKeyPair("RSA", 2048);
     }
 
-    public void Serve(){
+    public void serve(){
         try {
             serverSocket = new ServerSocket(2000);
             serverSocket.setReuseAddress(true);
