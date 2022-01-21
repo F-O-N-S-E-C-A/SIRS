@@ -36,8 +36,7 @@ public class StringCipher {
         return new SecretKeySpec(encoded, "AES");
     }
 
-    public String digest(String plainText, String keyPath) throws Exception {
-        Key key = readSecretKey(keyPath);
+    public String digest(String plainText) throws Exception {
         byte[] plainBytes = plainText.getBytes();
 
         final String DIGEST_ALGO = "SHA-256";
@@ -48,16 +47,22 @@ public class StringCipher {
         return Base64.getEncoder().encodeToString(digestBytes);
     }
 
-    //  public String cipher(String plainText, String keyPath, Function<String, ? extends Key> keyFunc) throws Exception {
-    public String cipher(String plainText, Key key) throws Exception {
-//      Key key = keyFunc.apply(keyPath);
+    private String useCipherMode(int cipherMode, String plainText, Key key) throws Exception {
         byte[] plainBytes = plainText.getBytes();
 
         final String CIPHER_ALGO = "AES/ECB/PKCS5Padding";
         Cipher cipher = Cipher.getInstance(CIPHER_ALGO);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
+        cipher.init(cipherMode, key);
         byte[] cipherBytes = cipher.doFinal(plainBytes);
 
         return Base64.getEncoder().encodeToString(cipherBytes);
+    }
+
+    public String cipher(String plainText, Key key) throws Exception {
+        return useCipherMode(Cipher.ENCRYPT_MODE, plainText, key);
+    }
+
+    public String decipher(String plainText, Key key) throws Exception {
+        return useCipherMode(Cipher.DECRYPT_MODE, plainText, key);
     }
 }
