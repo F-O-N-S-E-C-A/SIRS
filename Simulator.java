@@ -40,7 +40,7 @@ public class Simulator {
 
     public static void main(String [] args){
         Car witness = new Car(new Location(Double.parseDouble(args[0]), Double.parseDouble(args[1])));
-        witness.beWitness(Integer.parseInt(args[2]));
+        witness.witness_receiveRequest(Integer.parseInt(args[2]));
     }
 
     public double rand(){

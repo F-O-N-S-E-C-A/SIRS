@@ -2,8 +2,11 @@ import java.net.*;
 import java.io.*;
 import java.security.PublicKey;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import static java.lang.Thread.sleep;
+
+
 
 public class Car {
     private Location loc;
@@ -13,6 +16,8 @@ public class Car {
     private PublicKey serverSignPublicKey;
     private PublicKey serverCipherPublicKey;
     private String host = "localhost";
+
+    private LinkedList<Request> witness_requests = new LinkedList<>();
 
 
     public Car() {
@@ -42,14 +47,14 @@ public class Car {
     public void requestProofOfLocation() {
         Request response = null;
         try {
-            socket = new Socket("localhost", 2000);
+            socket = new Socket(Server.serverHost, Server.serverPort);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
             // create Message with Request of Proof of location
 
             setServerKeys(objectInputStream);
 
-            Request request = new Request("Request of proof of location");
+            Request request = new Request("request_timestamp");
 
 
             objectOutputStream.writeObject(request);
@@ -67,7 +72,32 @@ public class Car {
 
     }
 
-    public void beWitness(int port){
+    public void witness_sendProofs(){
+        try {
+            socket = new Socket(Server.serverHost, Server.serverPort);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+            // create Message with Request of Proof of location
+
+            setServerKeys(objectInputStream);
+
+            Request request = new Request("Request of proof of location");
+            System.out.println("send proofs " + witness_requests.size());
+            for(Request r : witness_requests){
+                r.setType("witness_proof");
+                r.setWitnessLocation(getLocation().getStringLoc());
+                objectOutputStream.writeObject(r);
+            }
+
+            //response = (Request) objectInputStream.readObject();
+            socket.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void witness_receiveRequest(int port){
+        Car c = this;
         new Thread() {
             public void run(){
                 ServerSocket ss = null;
@@ -78,7 +108,7 @@ public class Car {
                     while (true) {
                         Socket socket = ss.accept();
                         System.out.println("New client connected");
-                        new Thread(new CarHandler(socket, "witness")).start();
+                        new Thread(new CarHandler(c, socket, "witness")).start();
                     }
                 }
                 catch (IOException e) {
@@ -97,6 +127,9 @@ public class Car {
             }
         }.start();
     }
+    public void addRequest(Request r){
+        witness_requests.add(r);
+    }
 
     public void requestWitness(Request r){
         Simulator sim = new Simulator(this, 20);
@@ -108,7 +141,7 @@ public class Car {
                 //System.out.println("request witness");
                 socket = new Socket(host, port);
                 System.out.println("request witness");
-                CarHandler thread = new CarHandler(socket, "prover");
+                CarHandler thread = new CarHandler(this, socket, "prover");
                 thread.setRequest(r);
                 new Thread(thread).start();
 

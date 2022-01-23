@@ -25,10 +25,14 @@ public class Handler implements Runnable {
 
             System.out.println(request.getType());
 
-            // prepare response
-            request.setTimeStamp("10:30");
-
-            objectOutputStream.writeObject(request);
+            if (request.getType().equals("witness_proof")){
+                System.out.println("witness request received");
+            } else if (request.getType().equals("request_timestamp")){
+                request.setTimeStamp("10:30");
+                objectOutputStream.writeObject(request);
+            } else {
+                System.err.println("Type not specified");
+            }
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
