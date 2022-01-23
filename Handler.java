@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
-public class Handler implements Runnable{
+
+public class Handler implements Runnable {
     private Socket socket;
     private Server server;
 
@@ -20,7 +21,7 @@ public class Handler implements Runnable{
 
             sendServerKeys(objectOutputStream);
 
-            ServerRequest request = (ServerRequest) objectInputStream.readObject();
+            Request request = (Request) objectInputStream.readObject();
 
             System.out.println(request.getType());
 
@@ -43,9 +44,10 @@ public class Handler implements Runnable{
             } catch (IOException e) {
                 e.printStackTrace();
             }
-    }
+        }
 
     }
+
     private void sendServerKeys(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(server.getSignPublicKey()); // simulation
         objectOutputStream.writeObject(server.getCipherPublicKey()); // simulation}

@@ -1,13 +1,13 @@
 import java.io.Serializable;
 import java.security.PublicKey;
 
-public class ServerRequest implements Serializable{
+public class Request implements Serializable{
     private String type;
     private String timeStamp;
     private PublicKey carCipherPublicKey;
     private PublicKey carSignPublicKey;
 
-    public ServerRequest(String type) {
+    public Request(String type) {
         this.type = type;
     }
 
@@ -37,6 +37,10 @@ public class ServerRequest implements Serializable{
 
     public void setTimeStamp(String t) {
         this.timeStamp = t;
+    }
+
+    public void setType(String t){
+        type = t;
     }
 
 }

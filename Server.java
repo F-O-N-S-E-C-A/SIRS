@@ -15,7 +15,6 @@ public class Server {
     public Server() {
         signPair = new AsymmetricKeyPair("DSA", 2048);
         cipherPair = new AsymmetricKeyPair("RSA", 2048);
-        //publicKeysToFile(new PublicKey[]{signPair.getPublicKey(), cipherPair.getPublicKey()});
     }
 
     public PublicKey getSignPublicKey() {
@@ -52,15 +51,4 @@ public class Server {
         }
     }
 
-    /*private void publicKeysToFile(PublicKey [] pks){
-        try {
-            FileWriter writer = new FileWriter("serverPublicKeys.txt");
-            for(PublicKey pk : pks){
-                writer.write(Base64.getEncoder().encodeToString(pk.getEncoded())+"\n");
-            }
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
 }

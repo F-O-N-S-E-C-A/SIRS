@@ -1,14 +1,9 @@
 import java.net.*;
 import java.io.*;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.Scanner;
+import java.util.HashMap;
+
+import static java.lang.Thread.sleep;
 
 public class Car {
     private Location loc;
@@ -17,6 +12,7 @@ public class Car {
     private Socket socket;
     private PublicKey serverSignPublicKey;
     private PublicKey serverCipherPublicKey;
+    private String host = "localhost";
 
 
     public Car() {
@@ -38,7 +34,13 @@ public class Car {
         return loc;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+
     public void requestProofOfLocation() {
+        Request response = null;
         try {
             socket = new Socket("localhost", 2000);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -47,36 +49,78 @@ public class Car {
 
             setServerKeys(objectInputStream);
 
-            ServerRequest request = new ServerRequest("Request of proof of location");
+            Request request = new Request("Request of proof of location");
 
 
             objectOutputStream.writeObject(request);
 
-            ServerRequest response = (ServerRequest) objectInputStream.readObject();
-            System.out.println(response.getType() + "  " + response.getTimeStamp());
+            response = (Request) objectInputStream.readObject();
+            System.out.println("response got from server " + response.getType() + "  " + response.getTimeStamp());
 
             socket.close();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+        if (response != null) {
+            requestWitness(response);
+        }
+
     }
 
-    /*private void getServerKeysFromFile() {
-        try {
-            File file = new File("serverPublicKeys.txt");
-            Scanner reader = new Scanner(file);
-            //serverSignPublicKey = KeyFactory.getInstance("DSA").generatePublic(Base64.getDecoder().decode(reader.nextLine()));
-            serverCipherPublicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(reader.nextLine())));
-            reader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
+    public void beWitness(int port){
+        new Thread() {
+            public void run(){
+                ServerSocket ss = null;
+                try {
+                    ss = new ServerSocket(port);
+                    ss.setReuseAddress(true);
+
+                    while (true) {
+                        Socket socket = ss.accept();
+                        System.out.println("New client connected");
+                        new Thread(new CarHandler(socket, "witness")).start();
+                    }
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    if (ss != null) {
+                        try {
+                            ss.close();
+                        }
+                        catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }.start();
+    }
+
+    public void requestWitness(Request r){
+        Simulator sim = new Simulator(this, 20);
+        HashMap<Integer, Car> witnesses = sim.findWitnesses(3000);
+        for(int port : witnesses.keySet()){
+            String host = witnesses.get(port).getHost();
+            // make socket connections
+            try {
+                //System.out.println("request witness");
+                socket = new Socket(host, port);
+                System.out.println("request witness");
+                CarHandler thread = new CarHandler(socket, "prover");
+                thread.setRequest(r);
+                new Thread(thread).start();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-    }*/
+
+    }
+
+
+
     private void setServerKeys(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
         serverSignPublicKey = (PublicKey) objectInputStream.readObject(); // simulation
         serverCipherPublicKey = (PublicKey) objectInputStream.readObject(); // simulation
