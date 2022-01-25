@@ -17,6 +17,8 @@ public class Car {
     private PublicKey serverCipherPublicKey;
     private String host = "localhost";
 
+    public static int incomingPort = 4000;
+
     private LinkedList<Request> witness_requests = new LinkedList<>();
 
 
@@ -68,9 +70,46 @@ public class Car {
         }
         if (response != null) {
             requestWitness(response);
+            waitForCertificate();
         }
 
     }
+
+    public void waitForCertificate(){
+        new Thread() {
+            public void run(){
+                ServerSocket ss = null;
+                try {
+                    ss = new ServerSocket(incomingPort);
+                    ss.setReuseAddress(true);
+
+                    while (true) {
+                        Socket socket = ss.accept();
+                        InputStream inputStream = socket.getInputStream();
+                        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+
+                        Request request = (Request) objectInputStream.readObject();
+                        System.out.println(request.getType());
+                        socket.close();
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (ss != null) {
+                        try {
+                            ss.close();
+                        }
+                        catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }.start();
+    }
+
+
+
 
     public void witness_sendProofs(){
         try {

@@ -27,6 +27,7 @@ public class Handler implements Runnable {
 
             if (request.getType().equals("witness_proof")){
                 System.out.println("witness request received");
+                server.sendCertificate(0);
             } else if (request.getType().equals("request_timestamp")){
                 request.setTimeStamp("10:30");
                 objectOutputStream.writeObject(request);
@@ -56,6 +57,5 @@ public class Handler implements Runnable {
         objectOutputStream.writeObject(server.getSignPublicKey()); // simulation
         objectOutputStream.writeObject(server.getCipherPublicKey()); // simulation}
     }
-
 
 }

@@ -10,7 +10,7 @@ import java.util.Base64;
 public class Server {
     private AsymmetricKeyPair signPair;
     private AsymmetricKeyPair cipherPair;
-    private HashMap<Integer, Socket> cars;
+    private HashMap<Integer, String> cars;
     private ServerSocket serverSocket;
 
     private int lastID = 0;
@@ -31,9 +31,26 @@ public class Server {
         return cipherPair.getPublicKey();
     }
 
-    public int addCar(Socket s){
+    public int addCar(String s){
         cars.put(lastID+1, s);
         return lastID;
+    }
+
+    public void sendCertificate(int id){
+        try {
+            Socket socket = new Socket("localhost", Car.incomingPort);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+
+            // create Message with Request of Proof of location
+
+            Request request = new Request("certificate");
+
+            objectOutputStream.writeObject(request);
+
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void serve(){
