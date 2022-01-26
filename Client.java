@@ -1,26 +1,53 @@
-import java.net.Socket;
 import java.security.*;
 public class Client {
-    private PublicKey publicKey;
+    private PublicKey signPublicKey;
+    private PublicKey cipherPublicKey;
     private Location lastLocation;
-    private Socket socket;
+    private int id;
+    private String host;
 
-    public Client(Socket socket, PublicKey publicKey, Location loc){
-        this.socket = socket;
-        this.publicKey = publicKey;
-        this.lastLocation = loc;
+    public Client(PublicKey signPublicKey, PublicKey cipherPublicKey) {
+        this.signPublicKey = signPublicKey;
+        this.cipherPublicKey = cipherPublicKey;
     }
 
-    public Socket getSocket(){
-        return socket;
+    public PublicKey getSignPublicKey() {
+        return signPublicKey;
     }
 
-    public Location getLocation(){
+    public void setSignPublicKey(PublicKey signPublicKey) {
+        this.signPublicKey = signPublicKey;
+    }
+
+    public PublicKey getCipherPublicKey() {
+        return cipherPublicKey;
+    }
+
+    public void setCipherPublicKey(PublicKey cipherPublicKey) {
+        this.cipherPublicKey = cipherPublicKey;
+    }
+
+    public Location getLastLocation() {
         return lastLocation;
     }
 
-    public PublicKey getpublicKey(){
-        return publicKey;
+    public void setLastLocation(Location lastLocation) {
+        this.lastLocation = lastLocation;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
 }

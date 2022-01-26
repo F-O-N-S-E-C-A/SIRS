@@ -47,7 +47,7 @@ public class Simulator {
         return min + Math.random() * (max - min);
     }
 
-    public boolean reachable(Car c1, Car c2){
+    public static boolean reachable(Car c1, Car c2){
         return c1.getLocation().distance(c2.getLocation()) < rangeRadius;
     }
 

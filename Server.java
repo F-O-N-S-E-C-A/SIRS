@@ -10,7 +10,7 @@ import java.util.Base64;
 public class Server {
     private AsymmetricKeyPair signPair;
     private AsymmetricKeyPair cipherPair;
-    private HashMap<Integer, String> cars;
+    private HashMap<Integer, Client> cars;
     private ServerSocket serverSocket;
 
     private int lastID = 0;
@@ -31,9 +31,8 @@ public class Server {
         return cipherPair.getPublicKey();
     }
 
-    public int addCar(String s){
-        cars.put(lastID+1, s);
-        return lastID;
+    public void addCar(Client c){
+        cars.put(c.getId(), c);
     }
 
     public void sendCertificate(int id){
