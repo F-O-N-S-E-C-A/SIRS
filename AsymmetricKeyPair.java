@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.security.*;
 
 public class AsymmetricKeyPair {
@@ -33,4 +34,30 @@ public class AsymmetricKeyPair {
     public PublicKey getPublicKey() {
         return publicKey;
     }
+
+    public byte[] sign(Object obj){
+        try {
+            Signature signature = Signature.getInstance("SHA256withDSA");
+            signature.initSign(privateKey);
+            signature.update(HybridCipher.serialize(obj));
+            return signature.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | IOException | SignatureException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean verifySignature(PublicKey pk, byte [] sig, Object data){
+        try {
+            Signature signature = Signature.getInstance("SHA256withDSA");
+            signature.initVerify(pk);
+            signature.update(HybridCipher.serialize(data));
+            return signature.verify(sig);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
 }
