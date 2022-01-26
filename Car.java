@@ -104,12 +104,7 @@ public class Car {
         try {
             socket = new Socket(Server.serverHost, Server.serverPort);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-            // create Message with Request of Proof of location
 
-            setServerKeys(objectInputStream);
-
-            Request request = new Request("Request of proof of location");
             System.out.println("send proofs " + witness_requests.size());
             for(Request r : witness_requests){
                 r.setType("witness_proof");
@@ -119,7 +114,7 @@ public class Car {
 
             //response = (Request) objectInputStream.readObject();
             socket.close();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -32,6 +32,7 @@ public class Handler implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private void sendServerKeys(ObjectOutputStream objectOutputStream) throws IOException {
