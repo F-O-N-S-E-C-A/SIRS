@@ -19,6 +19,10 @@ public class HybridCipher {
         signingPair = sign;
         cipherPair = cipher;
 
+        // Dest pub keys
+        recv_cipher_pub = cp;
+        recv_sign_pub = sp;
+
         // Session
         sessionKey = null;
 
@@ -44,16 +48,15 @@ public class HybridCipher {
         if (sessionKey == null){
             try {
                 generateKey();
-                //Encrypt key kpub recv
+                //Encrypt key kpub recv TODO
                 CipheredObject cipheredKey = new CipheredObject(serialize(sessionKey));
 
                 outputStream.writeObject(cipheredKey);
 
             } catch (IOException e) {
-                //} catch (IOException e) {
                 e.printStackTrace();
             }
-        } //WAIT
+        }
 
         try {
             byte[] cipheredBytes = StringCipher.cipher(serialize(request), sessionKey);
@@ -70,16 +73,15 @@ public class HybridCipher {
 
         if (sessionKey == null){
             try {
-                //Decrypt
+                //Decrypt TODO
                 CipheredObject received = (CipheredObject) inputStream.readObject();
 
                 sessionKey = (Key) deserialize(received.getCipheredBytes());
 
             } catch (IOException | ClassNotFoundException e) {
-                //} catch (IOException e) {
                 e.printStackTrace();
             }
-        } //OK
+        }
 
         try {
             CipheredObject cipheredObject = (CipheredObject) inputStream.readObject();
@@ -115,5 +117,10 @@ public class HybridCipher {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setReceiverPubKeys(Key[] k){
+        recv_sign_pub = k[0];
+        recv_cipher_pub = k[1];
     }
 }

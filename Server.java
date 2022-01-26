@@ -1,9 +1,9 @@
+import java.lang.reflect.Array;
 import java.net.*;
 import java.io.*;
+import java.security.Key;
 import java.security.PublicKey;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Base64;
+import java.util.*;
 
 //https://www.geeksforgeeks.org/multithreaded-servers-in-java/
 
@@ -12,15 +12,21 @@ public class Server {
     private AsymmetricKeyPair cipherPair;
     private HashMap<Integer, Client> cars;
     private ServerSocket serverSocket;
+    private UUID id;
 
     private int lastID = 0;
 
     public static final int serverPort = 2000;
     public static final String serverHost = "localhost";
 
-    public Server() {
+    public Server() throws IOException, ClassNotFoundException {
         signPair = new AsymmetricKeyPair("DSA", 2048);
         cipherPair = new AsymmetricKeyPair("RSA", 2048);
+
+        id = UUID.randomUUID();
+        HashMap<UUID, Key[]> pubKeys = new HashMap<>();
+
+        Simulator.writePublicKeysToFile(pubKeys, id, signPair.getPublicKey(), cipherPair.getPublicKey());
     }
 
     public PublicKey getSignPublicKey() {
@@ -42,7 +48,7 @@ public class Server {
 
             // create Message with Request of Proof of location
 
-            Request request = new Request("certificate");
+            Request request = new Request(this.id, "certificate");
 
             objectOutputStream.writeObject(request);
 
@@ -87,4 +93,7 @@ public class Server {
         return cipherPair;
     }
 
+    public UUID getID(){
+        return id;
+    }
 }

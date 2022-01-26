@@ -3,6 +3,7 @@ import java.io.*;
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.UUID;
 
 import static java.lang.Thread.sleep;
 
@@ -18,20 +19,28 @@ public class Car {
     private String host = "localhost";
     private HybridCipher hs;
 
+    private UUID id;
+
     public static int incomingPort = 4000;
 
     private LinkedList<Request> witness_requests = new LinkedList<>();
 
 
-    public Car() {
+    public Car() throws IOException, ClassNotFoundException {
         signingPair = new AsymmetricKeyPair("DSA", 2048);
         cipherPair = new AsymmetricKeyPair("RSA", 2048);
+        id = UUID.randomUUID();
+
+        Simulator.writePublicKeysToFile(id, signingPair.getPublicKey(), cipherPair.getPublicKey());
     }
 
-    public Car(Location loc) {
+    public Car(Location loc) throws IOException, ClassNotFoundException {
         signingPair = new AsymmetricKeyPair("DSA", 2048);
         cipherPair = new AsymmetricKeyPair("RSA", 2048);
         this.loc = loc;
+        id = UUID.randomUUID();
+
+        Simulator.writePublicKeysToFile(id, signingPair.getPublicKey(), cipherPair.getPublicKey());
     }
 
     public void setLocation(Location loc) {
@@ -50,7 +59,7 @@ public class Car {
         socket = new Socket(Server.serverHost, Server.serverPort);
         hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
-        Request request = new Request("request_timestamp");
+        Request request = new Request(id, "request_timestamp");
 
         hs.send(request);
 
@@ -154,7 +163,7 @@ public class Car {
         witness_requests.add(r);
     }
 
-    public void requestWitness(Request r){
+    public void requestWitness(Request r) throws IOException, ClassNotFoundException {
         Simulator sim = new Simulator(this, 20);
         HashMap<Integer, Car> witnesses = sim.findWitnesses(3000);
         for(int port : witnesses.keySet()){
@@ -174,4 +183,8 @@ public class Car {
         }
 
     }
+    public UUID getID(){
+        return this.id;
+    }
+
 }

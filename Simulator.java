@@ -1,5 +1,11 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.Key;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.UUID;
 
 public class Simulator {
     public static final double max = 40.0;
@@ -10,7 +16,7 @@ public class Simulator {
     private LinkedList<Car> cars;
     private HashMap <Integer, Car> witnessses;
 
-    public Simulator(Car prover, int nCars){
+    public Simulator(Car prover, int nCars) throws IOException, ClassNotFoundException {
         this.prover = prover;
         cars = new LinkedList<>();
         for(int i = 0; i < nCars; i++){
@@ -21,7 +27,7 @@ public class Simulator {
         printCars();
     }
 
-    public HashMap<Integer, Car> findWitnesses(int port){
+    public HashMap<Integer, Car> findWitnesses(int port) throws IOException, ClassNotFoundException {
         witnessses = new HashMap<>();
         for(Car c : cars){
             if(reachable(c, prover)){
@@ -38,7 +44,7 @@ public class Simulator {
     }
 
 
-    public static void main(String [] args){
+    public static void main(String [] args) throws IOException, ClassNotFoundException {
         Car witness = new Car(new Location(Double.parseDouble(args[0]), Double.parseDouble(args[1])));
         witness.witness_receiveRequest(Integer.parseInt(args[2]));
     }
@@ -84,4 +90,42 @@ public class Simulator {
         }
     }
 
+    public synchronized static void writePublicKeysToFile(HashMap<UUID, Key[]> hm, UUID id, Key sp, Key cp) throws IOException {
+        File public_keys = new File("public_keys");
+        if (!public_keys.createNewFile()){
+            public_keys.delete();
+        }
+
+        hm.put(id, new Key[]{sp, cp});
+
+        FileOutputStream fileOutputStream = new FileOutputStream(public_keys);
+        fileOutputStream.write(HybridCipher.serialize(hm));
+    }
+
+    public synchronized static void writePublicKeysToFile(UUID id, Key sp, Key cp) throws IOException, ClassNotFoundException {
+        File public_keys = new File("public_keys");
+
+        FileInputStream fileInputStream = new FileInputStream(public_keys);
+        HashMap hm = (HashMap) HybridCipher.deserialize(fileInputStream.readAllBytes());
+
+        hm.put(id, new Key[]{sp, cp});
+
+        FileOutputStream fileOutputStream = new FileOutputStream(public_keys);
+        fileOutputStream.write(HybridCipher.serialize(hm));
+    }
+
+    public static Key[] readPublicKeys(UUID id) throws IOException, ClassNotFoundException {
+        File public_keys = new File("public_keys");
+
+        FileInputStream fileInputStream = new FileInputStream(public_keys);
+        HashMap hm = (HashMap) HybridCipher.deserialize(fileInputStream.readAllBytes());
+        return (Key[]) hm.get(id);
+    }
+
+    public static HashMap<UUID, Key[]> readPublicKeysHashMap() throws IOException, ClassNotFoundException {
+        File public_keys = new File("public_keys");
+
+        FileInputStream fileInputStream = new FileInputStream(public_keys);
+        return (HashMap<UUID, Key[]>) HybridCipher.deserialize(fileInputStream.readAllBytes());
+    }
 }

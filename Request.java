@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.util.UUID;
 
 public class Request implements Serializable {
     private String type;
@@ -8,8 +9,9 @@ public class Request implements Serializable {
     private PublicKey carSignPublicKey;
     private String witnessLocation; //cipher with server public key
     private String proverLocation; //cipher with server public key
+    private UUID id;
 
-    public Request(String type) {
+    public Request(UUID id, String type) {
         this.type = type;
     }
 
@@ -62,5 +64,17 @@ public class Request implements Serializable {
         this.witnessLocation = l;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public void setSender(UUID id, String type){
+        this.id = id;
+        this.type = type;
+    }
 }
 

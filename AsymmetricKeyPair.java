@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.security.*;
 
 public class AsymmetricKeyPair {
-
     private KeyPair pair;
     private PrivateKey privateKey;
     private PublicKey publicKey;

@@ -16,15 +16,18 @@ public class Handler implements Runnable {
     public void run() {
         try {
             Request request = hs.receive();
+            hs.setReceiverPubKeys(Simulator.readPublicKeys(request.getId()));
 
             if (request.getType().equals("witness_proof")){
                 System.out.println("witness request received");
                 server.sendCertificate(0);
             } else if (request.getType().equals("request_timestamp")){
                 request.setTimeStamp("10:30");
+                request.setId(server.getID());
                 hs.send(request);
             }else if (request.getType().equals("session_key")){
                 request.setTimeStamp("10:30");
+                request.setId(server.getID());
                 hs.send(request);
             } else {
                 System.err.println("Type not specified");
