@@ -9,7 +9,6 @@ public class Request implements Serializable {
     private String witnessLocation; //cipher with server public key
     private String proverLocation; //cipher with server public key
 
-
     public Request(String type) {
         this.type = type;
     }

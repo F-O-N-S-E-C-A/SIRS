@@ -65,8 +65,9 @@ public class Server {
         }
         catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             if (serverSocket != null) {
                 try {
                     serverSocket.close();
@@ -76,6 +77,14 @@ public class Server {
                 }
             }
         }
+    }
+
+    public AsymmetricKeyPair getSignPair() {
+        return signPair;
+    }
+
+    public AsymmetricKeyPair getCipherPair() {
+        return cipherPair;
     }
 
 }

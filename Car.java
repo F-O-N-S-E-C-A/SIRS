@@ -16,6 +16,7 @@ public class Car {
     private PublicKey serverSignPublicKey;
     private PublicKey serverCipherPublicKey;
     private String host = "localhost";
+    private HybridCipher hs;
 
     public static int incomingPort = 4000;
 
@@ -45,34 +46,22 @@ public class Car {
         return host;
     }
 
+    public void requestProofOfLocation() throws Exception {
+        socket = new Socket(Server.serverHost, Server.serverPort);
+        hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
-    public void requestProofOfLocation() {
-        Request response = null;
-        try {
-            socket = new Socket(Server.serverHost, Server.serverPort);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-            // create Message with Request of Proof of location
+        Request request = new Request("request_timestamp");
 
-            setServerKeys(objectInputStream);
+        hs.send(request);
 
-            Request request = new Request("request_timestamp");
+        Request response = hs.receive();
+        hs.closeSocket();
+        System.out.println(response.getType());
 
-
-            objectOutputStream.writeObject(request);
-
-            response = (Request) objectInputStream.readObject();
-            System.out.println("response got from server " + response.getType() + "  " + response.getTimeStamp());
-
-            socket.close();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         if (response != null) {
             requestWitness(response);
             waitForCertificate();
         }
-
     }
 
     public void waitForCertificate(){
