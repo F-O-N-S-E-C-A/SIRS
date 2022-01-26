@@ -34,9 +34,4 @@ public class Handler implements Runnable {
         }
 
     }
-
-    private void sendServerKeys(ObjectOutputStream objectOutputStream) throws IOException {
-        objectOutputStream.writeObject(server.getSignPublicKey()); // simulation
-        objectOutputStream.writeObject(server.getCipherPublicKey()); // simulation}
-    }
 }

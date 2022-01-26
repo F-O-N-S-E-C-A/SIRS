@@ -174,11 +174,4 @@ public class Car {
         }
 
     }
-
-
-
-    private void setServerKeys(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
-        serverSignPublicKey = (PublicKey) objectInputStream.readObject(); // simulation
-        serverCipherPublicKey = (PublicKey) objectInputStream.readObject(); // simulation
-    }
 }
