@@ -14,7 +14,7 @@ public class HybridCipher {
 
     private Socket socket;
 
-    public HybridCipher(AsymmetricKeyPair sign, AsymmetricKeyPair cipher, Key sp, Key cp , Socket s) throws Exception {
+    public HybridCipher(AsymmetricKeyPair sign, AsymmetricKeyPair cipher, Key sp, Key cp , Socket s) {
         // Pub, Priv
         signingPair = sign;
         cipherPair = cipher;
@@ -30,7 +30,7 @@ public class HybridCipher {
         socket = s;
     }
 
-    public HybridCipher(AsymmetricKeyPair sign, AsymmetricKeyPair cipher, Socket s) throws Exception {
+    public HybridCipher(AsymmetricKeyPair sign, AsymmetricKeyPair cipher, Socket s){
         // Pub, Priv
         signingPair = sign;
         cipherPair = cipher;
@@ -42,18 +42,22 @@ public class HybridCipher {
         socket = s;
     }
 
-    public void send(Request request) throws Exception {
-        ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+    public void send(Request request) {
 
+        ObjectOutputStream outputStream = null;
+        try {
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         if (sessionKey == null){
             try {
                 generateKey();
-                //Encrypt key kpub recv TODO
-                CipheredObject cipheredKey = new CipheredObject(serialize(sessionKey));
-
+                byte[] cipheredSK = StringCipher.asymmetricCipher(serialize(sessionKey), recv_cipher_pub);
+                CipheredObject cipheredKey = new CipheredObject(cipheredSK);
                 outputStream.writeObject(cipheredKey);
 
-            } catch (IOException e) {
+            } catch (IOException | NoSuchPaddingException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
         }
@@ -63,21 +67,22 @@ public class HybridCipher {
 
             outputStream.writeObject(new CipheredObject(cipheredBytes));
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public Request receive() throws Exception{
-        ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-
+    public Request receive(){
+        ObjectInputStream inputStream = null;
+        try {
+            inputStream = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         if (sessionKey == null){
             try {
-                //Decrypt TODO
                 CipheredObject received = (CipheredObject) inputStream.readObject();
-
-                sessionKey = (Key) deserialize(received.getCipheredBytes());
-
+                sessionKey = (Key) deserialize(cipherPair.decipher(received.getCipheredBytes()));
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }

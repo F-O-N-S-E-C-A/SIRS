@@ -36,11 +36,45 @@ public class StringCipher {
         return cipherBytes;
     }
 
-    public static byte[] cipher(byte[] plainBytes, Key key) throws Exception {
-        return useCipherMode(Cipher.ENCRYPT_MODE, plainBytes, key);
+    public static byte[] cipher(byte[] plainBytes, Key key){
+        try {
+            return useCipherMode(Cipher.ENCRYPT_MODE, plainBytes, key);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public static byte[] decipher(byte[] plainBytes, Key key) throws Exception {
-        return useCipherMode(Cipher.DECRYPT_MODE, plainBytes, key);
+    public static byte[] decipher(byte[] plainBytes, Key key) {
+        try {
+            return useCipherMode(Cipher.DECRYPT_MODE, plainBytes, key);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
+
+    public static byte[] asymmetricCipher(byte[] plainBytes, Key key){
+        try {
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            cipher.update(plainBytes);
+            return cipher.doFinal();
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static byte[] asymmetricDecipher(byte[] ciphered, Key key){
+        try {
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            return cipher.doFinal(ciphered);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

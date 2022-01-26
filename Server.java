@@ -23,7 +23,7 @@ public class Server {
         signPair = new AsymmetricKeyPair("DSA", 2048);
         cipherPair = new AsymmetricKeyPair("RSA", 2048);
 
-        id = UUID.randomUUID();
+        id = UUID.fromString(Simulator.serverID);
         HashMap<UUID, Key[]> pubKeys = new HashMap<>();
 
         Simulator.writePublicKeysToFile(pubKeys, id, signPair.getPublicKey(), cipherPair.getPublicKey());
@@ -41,18 +41,14 @@ public class Server {
         cars.put(c.getId(), c);
     }
 
-    public void sendCertificate(int id){
+    public void sendCertificate(UUID id){
         try {
             Socket socket = new Socket("localhost", Car.incomingPort);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-
-            // create Message with Request of Proof of location
-
             Request request = new Request(this.id, "certificate");
-
-            objectOutputStream.writeObject(request);
-
-            socket.close();
+            Key[] carKeys = Simulator.readPublicKeys(id);
+            HybridCipher hs = new HybridCipher(signPair, cipherPair, carKeys[0], carKeys[1], socket);
+            hs.send(request);
+            hs.closeSocket();
         } catch (IOException e) {
             e.printStackTrace();
         }

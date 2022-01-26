@@ -16,11 +16,12 @@ public class Handler implements Runnable {
     public void run() {
         try {
             Request request = hs.receive();
+            System.out.println(request.getId());
             hs.setReceiverPubKeys(Simulator.readPublicKeys(request.getId()));
 
             if (request.getType().equals("witness_proof")){
                 System.out.println("witness request received");
-                server.sendCertificate(0);
+                server.sendCertificate(request.getProverID());
             } else if (request.getType().equals("request_timestamp")){
                 request.setTimeStamp("10:30");
                 request.setId(server.getID());
@@ -35,6 +36,5 @@ public class Handler implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }

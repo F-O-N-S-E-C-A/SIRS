@@ -1,10 +1,12 @@
 import java.net.*;
 import java.io.*;
+import java.security.Key;
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import static java.lang.Thread.*;
 import static java.lang.Thread.sleep;
 
 
@@ -14,12 +16,13 @@ public class Car {
     private AsymmetricKeyPair signingPair;
     private AsymmetricKeyPair cipherPair;
     private Socket socket;
-    private PublicKey serverSignPublicKey;
-    private PublicKey serverCipherPublicKey;
+    private Key serverSignPublicKey;
+    private Key serverCipherPublicKey;
     private String host = "localhost";
     private HybridCipher hs;
 
     private UUID id;
+
 
     public static int incomingPort = 4000;
 
@@ -57,12 +60,17 @@ public class Car {
 
     public void requestProofOfLocation() throws Exception {
         socket = new Socket(Server.serverHost, Server.serverPort);
-        hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
+
+        Key[] serverKeys = Simulator.readPublicKeys(UUID.fromString(Simulator.serverID));
+        serverSignPublicKey = serverKeys[0];
+        serverCipherPublicKey = serverKeys[1];
 
         Request request = new Request(id, "request_timestamp");
+        request.setProverID(id);
+
+        hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
         hs.send(request);
-
         Request response = hs.receive();
         hs.closeSocket();
         System.out.println(response.getType());
@@ -83,14 +91,11 @@ public class Car {
 
                     while (true) {
                         Socket socket = ss.accept();
-                        InputStream inputStream = socket.getInputStream();
-                        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-
-                        Request request = (Request) objectInputStream.readObject();
+                        hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
+                        Request request = hs.receive();
                         System.out.println(request.getType());
-                        socket.close();
                     }
-                } catch (IOException | ClassNotFoundException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
                     if (ss != null) {
@@ -112,17 +117,19 @@ public class Car {
     public void witness_sendProofs(){
         try {
             socket = new Socket(Server.serverHost, Server.serverPort);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+
+            Key[] serverKeys = Simulator.readPublicKeys(UUID.fromString(Simulator.serverID));
+            serverSignPublicKey = serverKeys[0];
+            serverCipherPublicKey = serverKeys[1];
+
+            hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
             System.out.println("send proofs " + witness_requests.size());
-            for(Request r : witness_requests){
-                r.setType("witness_proof");
-                r.setWitnessLocation(getLocation().getStringLoc());
-                objectOutputStream.writeObject(r);
-            }
-
-            //response = (Request) objectInputStream.readObject();
-            socket.close();
+            Request request = witness_requests.pop();
+            request.setSender(id, "witness_proof");
+            request.setWitnessLocation(getLocation().getStringLoc());
+            hs.send(request);
+            hs.closeSocket();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -140,7 +147,8 @@ public class Car {
                     while (true) {
                         Socket socket = ss.accept();
                         System.out.println("New client connected");
-                        new Thread(new CarHandler(c, socket, "witness")).start();
+                        CarHandler handler = new CarHandler(c, socket, "witness");
+                        new Thread(handler).start();
                     }
                 }
                 catch (IOException e) {
@@ -171,20 +179,39 @@ public class Car {
             // make socket connections
             try {
                 //System.out.println("request witness");
-                socket = new Socket(host, port);
+                boolean connected = false;
+                while(!connected){
+                    try {
+                        socket = new Socket(host, port);
+                        connected = true;
+                    } catch (ConnectException e){
+                        Thread.sleep(100);
+                        connected = false;
+                    }
+                }
+
                 System.out.println("request witness");
                 CarHandler thread = new CarHandler(this, socket, "prover");
                 thread.setRequest(r);
+                thread.setReceiver(witnesses.get(port));
                 new Thread(thread).start();
 
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
     }
+
     public UUID getID(){
         return this.id;
     }
 
+    public AsymmetricKeyPair getSignPair() {
+        return signingPair;
+    }
+
+    public AsymmetricKeyPair getCipherPair() {
+        return cipherPair;
+    }
 }

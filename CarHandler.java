@@ -1,73 +1,64 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.UUID;
 
 public class CarHandler implements Runnable {
     private Socket socket;
     private String type;
     private Request request;
     private Car car;
+    private Car receiver;
+    private HybridCipher hs;
 
     public CarHandler(Car car, Socket socket, String type) {
         this.socket = socket;
         this.type = type;
         this.car = car;
+        try {
+            this.hs = new HybridCipher(car.getSignPair(), car.getCipherPair(), this.socket);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void run() {
-        System.out.println("type: " + type);
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
         try {
-            inputStream = socket.getInputStream();
-            outputStream = socket.getOutputStream();
-
-            System.out.println("car handler");
-
-            if(type.equals("witness")){
+            if (type.equals("witness")) {
+                hs.setReceiverPubKeys(Simulator.readPublicKeys(UUID.fromString(Simulator.serverID)));
                 System.out.println("car handler - witness");
-                run_witness(inputStream);
-            } else if(type.equals("prover")){
+                run_witness();
+            } else if (type.equals("prover")) {
+                hs.setReceiverPubKeys(Simulator.readPublicKeys(receiver.getID()));
                 System.out.println("car handler - prover");
-                run_prover(outputStream);
+                run_prover();
             }
 
-
-        } catch (IOException | ClassNotFoundException e) {
-        //} catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                    socket.close();
-                }
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
     }
 
-    public void setRequest(Request request){
+    public void setReceiver(Car c) {
+        this.receiver = c;
+    }
+
+    public void setRequest(Request request) {
         this.request = request;
     }
 
-    public void run_witness(InputStream inputStream) throws IOException, ClassNotFoundException {
-        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-        Request request = (Request) objectInputStream.readObject();
+    public void run_witness() throws IOException, ClassNotFoundException {
+        Request request = hs.receive();
         System.out.println("request received in witness" + request.getType());
         car.addRequest(request);
         car.witness_sendProofs();
         System.out.println("request received in witness" + request.getType());
     }
 
-    public void run_prover(OutputStream outputStream) throws IOException {
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        request.setType("broadcast to witnesses");
-        objectOutputStream.writeObject(request);
+    public void run_prover() throws IOException {
+        request.setSender(car.getID(), "broadcast to witnesses");
+        hs.send(request);
+        hs.closeSocket();
         System.out.println("request broad casted to witness");
     }
 

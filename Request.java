@@ -10,8 +10,10 @@ public class Request implements Serializable {
     private String witnessLocation; //cipher with server public key
     private String proverLocation; //cipher with server public key
     private UUID id;
+    private UUID proverID;
 
     public Request(UUID id, String type) {
+        this.id = id;
         this.type = type;
     }
 
@@ -72,9 +74,18 @@ public class Request implements Serializable {
         this.id = id;
     }
 
+    public void setProverID(UUID id) {
+        this.proverID = id;
+    }
+
     public void setSender(UUID id, String type){
         this.id = id;
         this.type = type;
     }
+
+    public UUID getProverID(){
+        return proverID;
+    }
+
 }
 

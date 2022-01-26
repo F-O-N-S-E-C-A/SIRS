@@ -58,5 +58,9 @@ public class AsymmetricKeyPair {
         return false;
     }
 
+    public byte[] decipher(byte[] ciphered){
+        return StringCipher.asymmetricDecipher(ciphered, privateKey);
+    }
+
 
 }
