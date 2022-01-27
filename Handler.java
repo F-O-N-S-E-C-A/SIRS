@@ -17,7 +17,6 @@ public class Handler implements Runnable {
         try {
             Request request = hs.receive();
             System.out.println(request.getId());
-            hs.setReceiverPubKeys(Simulator.readPublicKeys(request.getId()));
 
             if (request.getType().equals("witness_proof")){
                 System.out.println("witness request received");

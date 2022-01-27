@@ -12,6 +12,8 @@ public class HybridCipher {
     private Key recv_sign_pub;
     private Key sessionKey;
 
+    private byte[] sessionKeySignature;
+
     private Socket socket;
 
     public HybridCipher(AsymmetricKeyPair sign, AsymmetricKeyPair cipher, Key sp, Key cp , Socket s) {
@@ -53,8 +55,11 @@ public class HybridCipher {
         if (sessionKey == null){
             try {
                 generateKey();
+                //freshness TODO
+                byte[] signature = signingPair.sign(serialize(sessionKey));
                 byte[] cipheredSK = StringCipher.asymmetricCipher(serialize(sessionKey), recv_cipher_pub);
                 CipheredObject cipheredKey = new CipheredObject(cipheredSK);
+                cipheredKey.setSignature(signature);
                 outputStream.writeObject(cipheredKey);
 
             } catch (IOException | NoSuchPaddingException | NoSuchAlgorithmException e) {
@@ -64,7 +69,6 @@ public class HybridCipher {
 
         try {
             byte[] cipheredBytes = StringCipher.cipher(serialize(request), sessionKey);
-
             outputStream.writeObject(new CipheredObject(cipheredBytes));
 
         } catch (IOException e) {
@@ -83,6 +87,11 @@ public class HybridCipher {
             try {
                 CipheredObject received = (CipheredObject) inputStream.readObject();
                 sessionKey = (Key) deserialize(cipherPair.decipher(received.getCipheredBytes()));
+                sessionKeySignature = received.getSignature();
+                if(recv_sign_pub != null){
+                    verifySKSignature();
+                }
+
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -93,7 +102,13 @@ public class HybridCipher {
 
             byte[] decipheredBytes = StringCipher.decipher(cipheredObject.getCipheredBytes(), sessionKey);
 
-            return (Request) deserialize(decipheredBytes);
+            Request r = (Request) deserialize(decipheredBytes);
+            if(recv_sign_pub == null){
+                setReceiverPubKeys(Simulator.readPublicKeys(r.getId()));
+                verifySKSignature();
+            }
+            return r;
+
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -127,5 +142,16 @@ public class HybridCipher {
     public void setReceiverPubKeys(Key[] k){
         recv_sign_pub = k[0];
         recv_cipher_pub = k[1];
+
+    }
+
+    private void verifySKSignature(){
+        try {
+            if (!AsymmetricKeyPair.verifySignature(recv_sign_pub, sessionKeySignature, serialize(sessionKey))){
+                System.err.println("invalid signature");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

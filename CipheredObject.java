@@ -1,7 +1,9 @@
 import java.io.*;
+import java.security.Key;
 
 public class CipheredObject implements Serializable {
     private byte[] cipheredBytes;
+    private byte[] signature;
 
     public CipheredObject(byte[] b) {
         cipheredBytes = b;
@@ -9,5 +11,13 @@ public class CipheredObject implements Serializable {
 
     public byte[] getCipheredBytes() {
         return cipheredBytes;
+    }
+
+    public void setSignature(byte [] s){
+        this.signature = s;
+    }
+
+    public byte[] getSignature() {
+        return signature;
     }
 }
