@@ -97,7 +97,7 @@ public class Car {
                         Request request = hs.receive();
                         if(request.getType().equals("Certificate") && request.getCertificate() != null){
                             if(AsymmetricKeyPair.verifySignature(serverSignPublicKey, request.getCertificateSignature(), request.getCertificate())){
-                                System.out.println("Prover - Received valid certificate");
+                                System.out.println("\u001B[42m" + "Prover - Received valid certificate" + "\u001B[0m");
                             } else {
                                 System.err.println("Certificate signature not valid");
                             }
@@ -183,7 +183,7 @@ public class Car {
     }
 
     public void requestWitness(Request r) throws IOException, ClassNotFoundException {
-        Simulator sim = new Simulator(this, 20);
+        Simulator sim = new Simulator(this, 40);
         HashMap<Integer, Car> witnesses = sim.findWitnesses(3000);
         for(int port : witnesses.keySet()){
             String host = witnesses.get(port).getHost();
