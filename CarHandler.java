@@ -25,17 +25,14 @@ public class CarHandler implements Runnable {
         try {
             hs.setReceiverPubKeys(Simulator.readPublicKeys(receiver.getID()));
             if (type.equals("witness")) {
-                System.out.println("car handler - witness");
                 run_witness();
             } else if (type.equals("prover")) {
-                System.out.println("car handler - prover");
                 run_prover();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     public void setReceiver(Car c) {
@@ -48,17 +45,15 @@ public class CarHandler implements Runnable {
 
     public void run_witness() throws IOException, ClassNotFoundException {
         Request request = hs.receive();
-        System.out.println("request received in witness" + request.getType());
+        System.out.println("Witness - Request of validation received");
         car.addRequest(request);
         car.witness_sendProofs();
-        System.out.println("request received in witness" + request.getType());
     }
 
     public void run_prover() throws IOException {
         request.setSender(car.getID(), "broadcast to witnesses");
         hs.send(request);
         hs.closeSocket();
-        System.out.println("request broad casted to witness");
     }
 
 }

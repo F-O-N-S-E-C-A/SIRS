@@ -73,9 +73,9 @@ public class Car {
         hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
         hs.send(request);
+        System.out.println("Prover - Request of timestamp sent to server");
         Request response = hs.receive();
         hs.closeSocket();
-        System.out.println(response.getType());
 
         if (response != null) {
             requestWitness(response);
@@ -125,7 +125,7 @@ public class Car {
 
             hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
-            System.out.println("send proofs " + witness_requests.size());
+            System.out.println("Witness - Send proof to server");
             Request request = witness_requests.pop();
             request.setSender(id, "witness_proof");
             request.setLocation(getLocation());
@@ -147,7 +147,6 @@ public class Car {
 
                     while (true) {
                         Socket socket = ss.accept();
-                        System.out.println("New client connected");
                         CarHandler handler = new CarHandler(c, socket, "witness");
                         handler.setReceiver(prover);
                         new Thread(handler).start();
@@ -192,7 +191,7 @@ public class Car {
                     }
                 }
 
-                System.out.println("request witness");
+                System.out.println("Prover - Request witness");
                 CarHandler thread = new CarHandler(this, socket, "prover");
                 thread.setRequest(r);
                 thread.setReceiver(witnesses.get(port));

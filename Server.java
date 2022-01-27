@@ -13,10 +13,7 @@ public class Server {
     private HashMap<Integer, Client> cars;
     private ServerSocket serverSocket;
     private UUID id;
-
     private HashMap<UUID, LinkedList<Request>> witnessReport;
-
-    private int lastID = 0;
 
     public static final int serverPort = 2000;
     public static final String serverHost = "localhost";
@@ -33,22 +30,20 @@ public class Server {
         witnessReport = new HashMap<>();
     }
 
-    public synchronized LinkedList<Request> getRequestsFromProver(UUID proverID){
-        LinkedList <Request> requests = witnessReport.get(proverID);
+    public synchronized LinkedList<Request> getRequestsFromProver(UUID proverID) {
+        LinkedList<Request> requests = witnessReport.get(proverID);
         return requests;
     }
 
-    public synchronized void addWitnessReport(UUID proverID, Request r){
-
-        if (witnessReport.containsKey(proverID)){
-            System.out.println(witnessReport);
-            LinkedList <Request> lst = witnessReport.get(proverID);
+    public synchronized void addWitnessReport(UUID proverID, Request r) {
+        if (witnessReport.containsKey(proverID)) {
+            LinkedList<Request> lst = witnessReport.get(proverID);
             lst.add(r);
             witnessReport.put(proverID, lst);
         } else {
-            LinkedList <Request> requests = new LinkedList<>();
+            LinkedList<Request> requests = new LinkedList<>();
             requests.add(r);
-            witnessReport.put(proverID,requests);
+            witnessReport.put(proverID, requests);
         }
 
     }
@@ -61,11 +56,10 @@ public class Server {
         return cipherPair.getPublicKey();
     }
 
-
-    public void sendCertificate(UUID id){
+    public void sendCertificate(UUID id) {
         try {
             Socket socket = new Socket("localhost", Car.incomingPort);
-            Request request = new Request(this.id, "certificate");
+            Request request = new Request(this.id, "Certificate");
             Key[] carKeys = Simulator.readPublicKeys(id);
             HybridCipher hs = new HybridCipher(signPair, cipherPair, carKeys[0], carKeys[1], socket);
             hs.send(request);
@@ -75,27 +69,22 @@ public class Server {
         }
     }
 
-    public void serve(){
+    public void serve() {
         try {
             serverSocket = new ServerSocket(serverPort);
             serverSocket.setReuseAddress(true);
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                //System.out.println("New client connected"+ client.getInetAddress().getHostAddress());
                 new Thread(new Handler(socket, this)).start();
             }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (serverSocket != null) {
                 try {
                     serverSocket.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -110,7 +99,7 @@ public class Server {
         return cipherPair;
     }
 
-    public UUID getID(){
+    public UUID getID() {
         return id;
     }
 }

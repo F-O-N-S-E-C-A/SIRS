@@ -6,7 +6,7 @@ public class Handler implements Runnable {
     private Server server;
     private HybridCipher hs;
 
-    public Handler(Socket socket, Server server) throws Exception {
+    public Handler(Socket socket, Server server){
         this.socket = socket;
         this.server = server;
 
@@ -16,16 +16,14 @@ public class Handler implements Runnable {
     public void run() {
         try {
             Request request = hs.receive();
-            System.out.println(request.getId());
 
             if (request.getType().equals("witness_proof")){
-                System.out.println("witness request received");
-                System.out.println(request.getLocation());
+                System.out.println("Server Handler - witness report received");
                 server.addWitnessReport(request.getProverID(), request);
 
-
             } else if (request.getType().equals("request_timestamp")){
-                Location proverLoc = request.getLocation(); //TODO
+                System.out.println("Server Handler - request timestamp received from prover");
+                Location proverLoc = request.getLocation();
                 request.setLocation(null);
                 Timestamp ts = new Timestamp(System.currentTimeMillis());
                 request.setTimeStamp(ts);

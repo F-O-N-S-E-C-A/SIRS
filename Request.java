@@ -8,7 +8,6 @@ public class Request implements Serializable {
     private Timestamp timeStamp; // prover UID and timestamp
     private byte [] timeStampSignature;
 
-
     private PublicKey carCipherPublicKey;
     private PublicKey carSignPublicKey;
     private Location location; //cipher with server public key
@@ -19,7 +18,6 @@ public class Request implements Serializable {
         this.id = id;
         this.type = type;
     }
-
 
 
     public Location getLocation() {
