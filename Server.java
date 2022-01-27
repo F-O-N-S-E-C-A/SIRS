@@ -14,6 +14,8 @@ public class Server {
     private ServerSocket serverSocket;
     private UUID id;
 
+    private HashMap<UUID, LinkedList<Request>> witnessReport;
+
     private int lastID = 0;
 
     public static final int serverPort = 2000;
@@ -27,6 +29,28 @@ public class Server {
         HashMap<UUID, Key[]> pubKeys = new HashMap<>();
 
         Simulator.writePublicKeysToFile(pubKeys, id, signPair.getPublicKey(), cipherPair.getPublicKey());
+
+        witnessReport = new HashMap<>();
+    }
+
+    public synchronized LinkedList<Request> getRequestsFromProver(UUID proverID){
+        LinkedList <Request> requests = witnessReport.get(proverID);
+        return requests;
+    }
+
+    public synchronized void addWitnessReport(UUID proverID, Request r){
+
+        if (witnessReport.containsKey(proverID)){
+            System.out.println(witnessReport);
+            LinkedList <Request> lst = witnessReport.get(proverID);
+            lst.add(r);
+            witnessReport.put(proverID, lst);
+        } else {
+            LinkedList <Request> requests = new LinkedList<>();
+            requests.add(r);
+            witnessReport.put(proverID,requests);
+        }
+
     }
 
     public PublicKey getSignPublicKey() {
@@ -37,9 +61,6 @@ public class Server {
         return cipherPair.getPublicKey();
     }
 
-    public void addCar(Client c){
-        cars.put(c.getId(), c);
-    }
 
     public void sendCertificate(UUID id){
         try {

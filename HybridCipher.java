@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 
 public class HybridCipher {
     private AsymmetricKeyPair signingPair;
@@ -124,7 +125,7 @@ public class HybridCipher {
     }
 
     public void generateKey() throws UnsupportedEncodingException, NoSuchPaddingException, NoSuchAlgorithmException {
-        sessionKey = StringCipher.generateSymmetricKey(32, "AES");
+        sessionKey = StringCipher.generateSymmetricKey(32, "AES"); // 32 bytes * 8 bits = 256 bits
     }
 
     public static byte[] serialize(Object obj) throws IOException {

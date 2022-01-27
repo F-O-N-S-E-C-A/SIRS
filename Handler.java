@@ -1,5 +1,5 @@
-import java.io.*;
 import java.net.Socket;
+import java.sql.Timestamp;
 
 public class Handler implements Runnable {
     private Socket socket;
@@ -20,16 +20,16 @@ public class Handler implements Runnable {
 
             if (request.getType().equals("witness_proof")){
                 System.out.println("witness request received");
-                //TODO
-                server.sendCertificate(request.getProverID());
+                server.addWitnessReport(request.getProverID(), request);
             } else if (request.getType().equals("request_timestamp")){
-                request.setTimeStamp("10:30");
+                Location proverLoc = request.getLocation(); //TODO
+                request.setLocation(null);
+                Timestamp ts = new Timestamp(System.currentTimeMillis());
+                request.setTimeStamp(ts);
+                request.signTimestamp(server.getSignPair().sign(ts));
                 request.setId(server.getID());
                 hs.send(request);
-            }else if (request.getType().equals("session_key")){
-                request.setTimeStamp("10:30");
-                request.setId(server.getID());
-                hs.send(request);
+                new Thread(new WaitForWitnesses(request.getProverID(), server, proverLoc, ts)).start();
             } else {
                 System.err.println("Type not specified");
             }

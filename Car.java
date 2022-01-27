@@ -1,12 +1,10 @@
 import java.net.*;
 import java.io.*;
 import java.security.Key;
-import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.UUID;
 
-import static java.lang.Thread.*;
 import static java.lang.Thread.sleep;
 
 
@@ -59,6 +57,8 @@ public class Car {
         return host;
     }
 
+    // requestProofOfLocation: prover -> server
+    // ask for the timestamp
     public void requestProofOfLocation() throws Exception {
         socket = new Socket(Server.serverHost, Server.serverPort);
 
@@ -68,6 +68,7 @@ public class Car {
 
         Request request = new Request(id, "request_timestamp");
         request.setProverID(id);
+        request.setLocation(this.getLocation());
 
         hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
@@ -118,7 +119,6 @@ public class Car {
     public void witness_sendProofs(){
         try {
             socket = new Socket(Server.serverHost, Server.serverPort);
-
             Key[] serverKeys = Simulator.readPublicKeys(UUID.fromString(Simulator.serverID));
             serverSignPublicKey = serverKeys[0];
             serverCipherPublicKey = serverKeys[1];
@@ -128,7 +128,7 @@ public class Car {
             System.out.println("send proofs " + witness_requests.size());
             Request request = witness_requests.pop();
             request.setSender(id, "witness_proof");
-            request.setWitnessLocation(getLocation().getStringLoc());
+            request.setLocation(getLocation());
             hs.send(request);
             hs.closeSocket();
         } catch (IOException e) {

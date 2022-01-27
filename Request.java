@@ -1,14 +1,17 @@
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 public class Request implements Serializable {
     private String type;
-    private String timeStamp; // prover UID and timestamp
+    private Timestamp timeStamp; // prover UID and timestamp
+    private byte [] timeStampSignature;
+
+
     private PublicKey carCipherPublicKey;
     private PublicKey carSignPublicKey;
-    private String witnessLocation; //cipher with server public key
-    private String proverLocation; //cipher with server public key
+    private Location location; //cipher with server public key
     private UUID id;
     private UUID proverID;
 
@@ -17,18 +20,15 @@ public class Request implements Serializable {
         this.type = type;
     }
 
-    public String getWitnessLocation() {
-        return witnessLocation;
+
+
+    public Location getLocation() {
+        return location;
     }
 
-    public String getProverLocation() {
-        return proverLocation;
+    public void setLocation(Location location) {
+        this.location = this.location;
     }
-
-    public void setProverLocation(String proverLocation) {
-        this.proverLocation = proverLocation;
-    }
-
 
     public PublicKey getCarCipherPublicKey() {
         return carCipherPublicKey;
@@ -50,20 +50,16 @@ public class Request implements Serializable {
         return type;
     }
 
-    public String getTimeStamp() {
+    public Timestamp getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(String t) {
+    public void setTimeStamp(Timestamp t) {
         this.timeStamp = t;
     }
 
     public void setType(String t) {
         type = t;
-    }
-
-    public void setWitnessLocation(String l) {
-        this.witnessLocation = l;
     }
 
     public UUID getId() {
@@ -81,6 +77,14 @@ public class Request implements Serializable {
     public void setSender(UUID id, String type){
         this.id = id;
         this.type = type;
+    }
+
+    public byte[] getTimestampSignature() {
+        return timeStampSignature;
+    }
+
+    public void signTimestamp(byte[] timeStampSignature) {
+        this.timeStampSignature = timeStampSignature;
     }
 
     public UUID getProverID(){
