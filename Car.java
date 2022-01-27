@@ -20,6 +20,7 @@ public class Car {
     private Key serverCipherPublicKey;
     private String host = "localhost";
     private HybridCipher hs;
+    private Car prover;
 
     private UUID id;
 
@@ -148,6 +149,7 @@ public class Car {
                         Socket socket = ss.accept();
                         System.out.println("New client connected");
                         CarHandler handler = new CarHandler(c, socket, "witness");
+                        handler.setReceiver(prover);
                         new Thread(handler).start();
                     }
                 }
@@ -213,5 +215,9 @@ public class Car {
 
     public AsymmetricKeyPair getCipherPair() {
         return cipherPair;
+    }
+
+    public void setProver(Car p){
+        prover = p;
     }
 }

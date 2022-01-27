@@ -20,6 +20,7 @@ public class Handler implements Runnable {
 
             if (request.getType().equals("witness_proof")){
                 System.out.println("witness request received");
+                //TODO
                 server.sendCertificate(request.getProverID());
             } else if (request.getType().equals("request_timestamp")){
                 request.setTimeStamp("10:30");

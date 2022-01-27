@@ -23,12 +23,11 @@ public class CarHandler implements Runnable {
 
     public void run() {
         try {
+            hs.setReceiverPubKeys(Simulator.readPublicKeys(receiver.getID()));
             if (type.equals("witness")) {
-                hs.setReceiverPubKeys(Simulator.readPublicKeys(UUID.fromString(Simulator.serverID)));
                 System.out.println("car handler - witness");
                 run_witness();
             } else if (type.equals("prover")) {
-                hs.setReceiverPubKeys(Simulator.readPublicKeys(receiver.getID()));
                 System.out.println("car handler - prover");
                 run_prover();
             }

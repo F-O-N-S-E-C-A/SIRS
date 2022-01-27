@@ -20,6 +20,7 @@ public class Simulator {
         cars = new LinkedList<>();
         for(int i = 0; i < nCars; i++){
             Car car = new Car();
+            car.setProver(prover);
             car.setLocation(new Location(rand(), rand()));
             cars.add(car);
         }

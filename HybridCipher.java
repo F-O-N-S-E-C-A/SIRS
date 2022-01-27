@@ -56,7 +56,7 @@ public class HybridCipher {
             try {
                 generateKey();
                 //freshness TODO
-                byte[] signature = signingPair.sign(serialize(sessionKey));
+                byte[] signature = signingPair.sign(sessionKey);
                 byte[] cipheredSK = StringCipher.asymmetricCipher(serialize(sessionKey), recv_cipher_pub);
                 CipheredObject cipheredKey = new CipheredObject(cipheredSK);
                 cipheredKey.setSignature(signature);
@@ -69,7 +69,9 @@ public class HybridCipher {
 
         try {
             byte[] cipheredBytes = StringCipher.cipher(serialize(request), sessionKey);
-            outputStream.writeObject(new CipheredObject(cipheredBytes));
+            CipheredObject ciphered = new CipheredObject(cipheredBytes);
+            ciphered.setSignature(signingPair.sign(request));
+            outputStream.writeObject(ciphered);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -103,10 +105,16 @@ public class HybridCipher {
             byte[] decipheredBytes = StringCipher.decipher(cipheredObject.getCipheredBytes(), sessionKey);
 
             Request r = (Request) deserialize(decipheredBytes);
+
             if(recv_sign_pub == null){
                 setReceiverPubKeys(Simulator.readPublicKeys(r.getId()));
                 verifySKSignature();
             }
+
+            if (!AsymmetricKeyPair.verifySignature(recv_sign_pub, cipheredObject.getSignature(), r)){
+                System.err.println("invalid signature");
+            }
+
             return r;
 
         } catch (IOException | ClassNotFoundException e) {
@@ -146,12 +154,8 @@ public class HybridCipher {
     }
 
     private void verifySKSignature(){
-        try {
-            if (!AsymmetricKeyPair.verifySignature(recv_sign_pub, sessionKeySignature, serialize(sessionKey))){
-                System.err.println("invalid signature");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!AsymmetricKeyPair.verifySignature(recv_sign_pub, sessionKeySignature, sessionKey)){
+            System.err.println("invalid signature");
         }
     }
 }
