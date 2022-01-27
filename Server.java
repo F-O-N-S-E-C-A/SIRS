@@ -1,18 +1,13 @@
-import java.lang.reflect.Array;
 import java.net.*;
 import java.io.*;
 import java.security.Key;
 import java.security.PublicKey;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
-
-//https://www.geeksforgeeks.org/multithreaded-servers-in-java/
 
 public class Server {
     private AsymmetricKeyPair signPair;
     private AsymmetricKeyPair cipherPair;
-    private HashMap<Integer, Client> cars;
     private ServerSocket serverSocket;
     private UUID id;
     private HashMap<UUID, LinkedList<Request>> witnessReport;

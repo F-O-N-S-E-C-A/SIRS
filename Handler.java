@@ -30,7 +30,7 @@ public class Handler implements Runnable {
                 request.signTimestamp(server.getSignPair().sign(ts));
                 request.setId(server.getID());
                 hs.send(request);
-                new Thread(new WaitForWitnesses(request.getProverID(), server, proverLoc, ts)).start();
+                new Thread(new WaitForWitnesses(request.getProverID(), server, proverLoc)).start();
 
             } else {
                 System.err.println("Type not specified");

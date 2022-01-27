@@ -1,10 +1,9 @@
 import javax.crypto.NoSuchPaddingException;
-import java.awt.desktop.UserSessionEvent;
 import java.io.*;
 import java.net.Socket;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+
 
 public class HybridCipher {
     private AsymmetricKeyPair signingPair;
@@ -58,7 +57,7 @@ public class HybridCipher {
                 generateKey();
                 //freshness TODO
                 byte[] signature = signingPair.sign(sessionKey);
-                byte[] cipheredSK = StringCipher.asymmetricCipher(serialize(sessionKey), recv_cipher_pub);
+                byte[] cipheredSK = Cipher.asymmetricCipher(serialize(sessionKey), recv_cipher_pub);
                 CipheredObject cipheredKey = new CipheredObject(cipheredSK);
                 cipheredKey.setSignature(signature);
                 outputStream.writeObject(cipheredKey);
@@ -69,7 +68,7 @@ public class HybridCipher {
         }
 
         try {
-            byte[] cipheredBytes = StringCipher.cipher(serialize(request), sessionKey);
+            byte[] cipheredBytes = Cipher.cipher(serialize(request), sessionKey);
             CipheredObject ciphered = new CipheredObject(cipheredBytes);
             ciphered.setSignature(signingPair.sign(request));
             outputStream.writeObject(ciphered);
@@ -103,7 +102,7 @@ public class HybridCipher {
         try {
             CipheredObject cipheredObject = (CipheredObject) inputStream.readObject();
 
-            byte[] decipheredBytes = StringCipher.decipher(cipheredObject.getCipheredBytes(), sessionKey);
+            byte[] decipheredBytes = Cipher.decipher(cipheredObject.getCipheredBytes(), sessionKey);
 
             Request r = (Request) deserialize(decipheredBytes);
 
@@ -125,7 +124,7 @@ public class HybridCipher {
     }
 
     public void generateKey() throws UnsupportedEncodingException, NoSuchPaddingException, NoSuchAlgorithmException {
-        sessionKey = StringCipher.generateSymmetricKey(32, "AES"); // 32 bytes * 8 bits = 256 bits
+        sessionKey = Cipher.generateSymmetricKey(32, "AES"); // 32 bytes * 8 bits = 256 bits
     }
 
     public static byte[] serialize(Object obj) throws IOException {

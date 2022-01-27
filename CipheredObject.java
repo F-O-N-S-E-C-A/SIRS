@@ -1,5 +1,4 @@
 import java.io.*;
-import java.security.Key;
 
 public class CipheredObject implements Serializable {
     private byte[] cipheredBytes;

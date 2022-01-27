@@ -13,7 +13,6 @@ public class Simulator {
 
     private Car prover;
     private LinkedList<Car> cars;
-    private HashMap <Integer, Car> witnessses;
 
     public Simulator(Car prover, int nCars) throws IOException, ClassNotFoundException {
         this.prover = prover;
@@ -27,8 +26,8 @@ public class Simulator {
         printCars();
     }
 
-    public HashMap<Integer, Car> findWitnesses(int port) throws IOException, ClassNotFoundException {
-        witnessses = new HashMap<>();
+    public HashMap<Integer, Car> findWitnesses(int port) {
+        HashMap<Integer, Car> witnessses = new HashMap<>();
         for(Car c : cars){
             if(reachable(c, prover)){
                 witnessses.put(port, c);
@@ -37,10 +36,6 @@ public class Simulator {
             }
         }
         return witnessses; // return the ports of the witnesses
-    }
-
-    public HashMap <Integer, Car> getWitnessses(){
-        return witnessses;
     }
 
 
@@ -53,35 +48,39 @@ public class Simulator {
     }
 
     private void printCars(){
-        System.out.println("Prover: \uD83C\uDFCE \nWitness: \uD83D\uDE97 \n Other cars: \uD83D\uDE99");
-        String [][] map = new String[(int)max][(int)max];
-        for(Car c: cars){
-            int lat = (int) c.getLocation().getLatitude();
-            int lon = (int) c.getLocation().getLongitude();
-            if (reachable(prover, c)){
-                map[lat][lon] = "\uD83D\uDE97 ";
-            } else {
-                map[lat][lon] = "\uD83D\uDE99 ";
+        try {
+            System.out.println("Prover: \uD83C\uDFCE \nWitness: \uD83D\uDE97 \n Other cars: \uD83D\uDE99");
+            String[][] map = new String[(int) max][(int) max];
+            for (Car c : cars) {
+                int lat = (int) c.getLocation().getLatitude();
+                int lon = (int) c.getLocation().getLongitude();
+                if (reachable(prover, c)) {
+                    map[lat][lon] = "\uD83D\uDE97 ";
+                } else {
+                    map[lat][lon] = "\uD83D\uDE99 ";
+                }
+
             }
+            int latProver = (int) prover.getLocation().getLatitude();
+            int lonProver = (int) prover.getLocation().getLongitude();
+            map[latProver][lonProver] = "\uD83C\uDFCE️ ";
 
-        }
-        int latProver = (int) prover.getLocation().getLatitude();
-        int lonProver = (int) prover.getLocation().getLongitude();
-        map[latProver][lonProver] = "\uD83C\uDFCE️ ";
-
-        for(int i = 0; i < map.length; i++) {
-            for(int j = 0; j < map[0].length; j++) {
-                if(map[i][j] == null){
-                    map[i][j] = "⬛️️ ";
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[0].length; j++) {
+                    if (map[i][j] == null) {
+                        map[i][j] = "⬛️️ ";
+                    }
                 }
             }
-        }
-        System.out.print(" ");
-        for(int i = 0; i < map.length; i++) {
-            for(int j = 0; j < map[0].length; j++) {
-                System.out.print(map[i][j]);
+            System.out.print(" ");
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[0].length; j++) {
+                    System.out.print(map[i][j]);
+                }
+                System.out.print("\n ");
             }
-            System.out.print("\n ");
+        } catch (ArrayIndexOutOfBoundsException e){
+            return;
         }
     }
 

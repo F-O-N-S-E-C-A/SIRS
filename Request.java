@@ -1,5 +1,4 @@
 import java.io.Serializable;
-import java.security.PublicKey;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -8,8 +7,6 @@ public class Request implements Serializable {
     private Timestamp timeStamp; // prover UID and timestamp
     private byte [] timeStampSignature;
 
-    private PublicKey carCipherPublicKey;
-    private PublicKey carSignPublicKey;
     private Location location; //cipher with server public key
     private UUID id;
     private UUID proverID;
@@ -41,22 +38,6 @@ public class Request implements Serializable {
 
     public void setLocation(Location location) {
         this.location = location;
-    }
-
-    public PublicKey getCarCipherPublicKey() {
-        return carCipherPublicKey;
-    }
-
-    public PublicKey getCarSignPublicKey() {
-        return carSignPublicKey;
-    }
-
-    public void setCarCipherPublicKey(PublicKey carCipherPublicKey) {
-        this.carCipherPublicKey = carCipherPublicKey;
-    }
-
-    public void setCarSignPublicKey(PublicKey carCipherPublicKey) {
-        this.carSignPublicKey = carCipherPublicKey;
     }
 
     public String getType() {

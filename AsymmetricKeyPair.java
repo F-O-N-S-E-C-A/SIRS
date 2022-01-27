@@ -59,7 +59,7 @@ public class AsymmetricKeyPair {
     }
 
     public byte[] decipher(byte[] ciphered){
-        return StringCipher.asymmetricDecipher(ciphered, privateKey);
+        return Cipher.asymmetricDecipher(ciphered, privateKey);
     }
 
 
