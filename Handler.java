@@ -20,7 +20,10 @@ public class Handler implements Runnable {
 
             if (request.getType().equals("witness_proof")){
                 System.out.println("witness request received");
+                System.out.println(request.getLocation());
                 server.addWitnessReport(request.getProverID(), request);
+
+
             } else if (request.getType().equals("request_timestamp")){
                 Location proverLoc = request.getLocation(); //TODO
                 request.setLocation(null);
@@ -30,6 +33,7 @@ public class Handler implements Runnable {
                 request.setId(server.getID());
                 hs.send(request);
                 new Thread(new WaitForWitnesses(request.getProverID(), server, proverLoc, ts)).start();
+
             } else {
                 System.err.println("Type not specified");
             }

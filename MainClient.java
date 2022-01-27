@@ -7,5 +7,4 @@ public class MainClient {
         System.out.println("ClientSide");
         new Car(new Location(20.0, 20.0)).requestProofOfLocation();
     }
-
 }

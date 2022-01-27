@@ -27,7 +27,7 @@ public class Request implements Serializable {
     }
 
     public void setLocation(Location location) {
-        this.location = this.location;
+        this.location = location;
     }
 
     public PublicKey getCarCipherPublicKey() {

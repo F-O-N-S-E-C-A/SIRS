@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public class Location{
+public class Location implements Serializable{
     private double latitude;
     private double longitude;
 
