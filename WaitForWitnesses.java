@@ -40,12 +40,12 @@ public class WaitForWitnesses implements Runnable{
                 }
             }
             if (validWitnesses >= minWitnesses && minWitnesses >= 2){
-                server.sendCertificate(proverID);
+                server.sendCertificate(proverID, true);
                 System.out.println("*** LOCATION APPROVED! ***");
             } else {
                 System.err.println("Not enough witnesses!");
+                server.sendCertificate(proverID, false);
             }
-
 
         } catch (InterruptedException e) {
             e.printStackTrace();

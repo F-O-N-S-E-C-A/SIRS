@@ -3,6 +3,8 @@ import java.net.*;
 import java.io.*;
 import java.security.Key;
 import java.security.PublicKey;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.*;
 
 //https://www.geeksforgeeks.org/multithreaded-servers-in-java/
@@ -56,12 +58,20 @@ public class Server {
         return cipherPair.getPublicKey();
     }
 
-    public void sendCertificate(UUID id) {
+    public void sendCertificate(UUID id, Boolean valid) {
         try {
             Socket socket = new Socket("localhost", Car.incomingPort);
-            Request request = new Request(this.id, "Certificate");
+
             Key[] carKeys = Simulator.readPublicKeys(id);
             HybridCipher hs = new HybridCipher(signPair, cipherPair, carKeys[0], carKeys[1], socket);
+            Request request = new Request(this.id, "Certificate");
+            if (valid) {
+                Timestamp ts = new Timestamp(System.currentTimeMillis());
+                String certificate = ts + "__" + carKeys[0] + "__APPROVED_BY_" + signPair.getPublicKey();
+                request.setCertificate(certificate, signPair.sign(certificate));
+            } else {
+                request.setType("Not approved");
+            }
             hs.send(request);
             hs.closeSocket();
         } catch (IOException e) {

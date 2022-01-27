@@ -95,7 +95,17 @@ public class Car {
                         Socket socket = ss.accept();
                         hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
                         Request request = hs.receive();
-                        System.out.println(request.getType());
+                        if(request.getType().equals("Certificate") && request.getCertificate() != null){
+                            if(AsymmetricKeyPair.verifySignature(serverSignPublicKey, request.getCertificateSignature(), request.getCertificate())){
+                                System.out.println("Prover - Received valid certificate");
+                            } else {
+                                System.err.println("Certificate signature not valid");
+                            }
+                        } else if(request.getType().equals("Not approved")){
+                            System.err.println("Certificate not approved");
+                        } else {
+                            System.err.println("Invalid type");
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

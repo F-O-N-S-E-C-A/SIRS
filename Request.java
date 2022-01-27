@@ -14,11 +14,26 @@ public class Request implements Serializable {
     private UUID id;
     private UUID proverID;
 
+    private String certificate;
+    private byte[] certificateSignature;
+
     public Request(UUID id, String type) {
         this.id = id;
         this.type = type;
     }
 
+    public void setCertificate(String t, byte[] sig){
+        this.certificate = t;
+        this.certificateSignature = sig;
+    }
+
+    public String getCertificate() {
+        return certificate;
+    }
+
+    public byte[] getCertificateSignature() {
+        return certificateSignature;
+    }
 
     public Location getLocation() {
         return location;
