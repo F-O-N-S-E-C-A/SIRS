@@ -2,19 +2,19 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-public class Request implements Serializable {
+public class MillenniumFalcon implements Serializable {
     private String type;
     private Timestamp timeStamp; // prover UID and timestamp
     private byte [] timeStampSignature;
 
     private Location location; //cipher with server public key
     private UUID id;
-    private UUID proverID;
+    private byte[] proverID;
 
     private String certificate;
     private byte[] certificateSignature;
 
-    public Request(UUID id, String type) {
+    public MillenniumFalcon(UUID id, String type) {
         this.id = id;
         this.type = type;
     }
@@ -64,9 +64,6 @@ public class Request implements Serializable {
         this.id = id;
     }
 
-    public void setProverID(UUID id) {
-        this.proverID = id;
-    }
 
     public void setSender(UUID id, String type){
         this.id = id;
@@ -81,8 +78,11 @@ public class Request implements Serializable {
         this.timeStampSignature = timeStampSignature;
     }
 
-    public UUID getProverID(){
+    public byte[] getProverID(){
         return proverID;
+    }
+    public void setProverID(byte[] id) {
+        this.proverID = id;
     }
 
 }

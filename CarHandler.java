@@ -4,7 +4,7 @@ import java.net.Socket;
 public class CarHandler implements Runnable {
     private Socket socket;
     private String type;
-    private Request request;
+    private MillenniumFalcon request;
     private Car car;
     private Car receiver;
     private HybridCipher hs;
@@ -38,14 +38,14 @@ public class CarHandler implements Runnable {
         this.receiver = c;
     }
 
-    public void setRequest(Request request) {
+    public void setRequest(MillenniumFalcon request) {
         this.request = request;
     }
 
     public void run_witness() throws IOException, ClassNotFoundException {
-        Request request = hs.receive();
+        MillenniumFalcon request = hs.receive();
         System.out.println("Witness - Request of validation received");
-        car.addRequest(request);
+        car.addProof(request);
         car.witness_sendProofs();
     }
 

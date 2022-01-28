@@ -44,7 +44,7 @@ public class HybridCipher {
         socket = s;
     }
 
-    public void send(Request request) {
+    public void send(MillenniumFalcon request) {
 
         ObjectOutputStream outputStream = null;
         try {
@@ -78,7 +78,7 @@ public class HybridCipher {
         }
     }
 
-    public Request receive(){
+    public MillenniumFalcon receive(){
         ObjectInputStream inputStream = null;
         try {
             inputStream = new ObjectInputStream(socket.getInputStream());
@@ -104,7 +104,7 @@ public class HybridCipher {
 
             byte[] decipheredBytes = Cipher.decipher(cipheredObject.getCipheredBytes(), sessionKey);
 
-            Request r = (Request) deserialize(decipheredBytes);
+            MillenniumFalcon r = (MillenniumFalcon) deserialize(decipheredBytes);
 
             if(recv_sign_pub == null){
                 setReceiverPubKeys(Simulator.readPublicKeys(r.getId()));

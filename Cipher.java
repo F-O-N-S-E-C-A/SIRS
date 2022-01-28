@@ -4,16 +4,6 @@ import java.security.*;
 import javax.crypto.*;
 
 public class Cipher {
-    /*public String digest(String plainText) throws Exception {
-        byte[] plainBytes = plainText.getBytes();
-
-        final String DIGEST_ALGO = "SHA-256";
-        MessageDigest messageDigest = MessageDigest.getInstance(DIGEST_ALGO);
-        messageDigest.update(plainBytes);
-        byte[] digestBytes = messageDigest.digest();
-
-        return Base64.getEncoder().encodeToString(digestBytes);
-    }*/
 
     public static SecretKeySpec generateSymmetricKey(int length, String algorithm) {
         SecureRandom rnd = new SecureRandom();
@@ -23,7 +13,6 @@ public class Cipher {
     }
 
     private static byte[] useCipherMode(int cipherMode, byte[] plainBytes, Key key) throws Exception {
-
         final String CIPHER_ALGO = "AES/ECB/PKCS5Padding";
         javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance(CIPHER_ALGO);
         cipher.init(cipherMode, key);

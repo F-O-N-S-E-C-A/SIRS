@@ -21,4 +21,9 @@ public class Location implements Serializable{
         return longitude;
     }
 
+    @Override
+    public String toString(){
+        return "Latitude-" + latitude + "_Longitude-" + longitude;
+    }
+
 }

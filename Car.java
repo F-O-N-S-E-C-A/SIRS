@@ -16,7 +16,7 @@ public class Car {
     private HybridCipher hs;
     private Car prover;
     private UUID id;
-    private LinkedList<Request> witness_requests = new LinkedList<>();
+    private LinkedList<MillenniumFalcon> witnessProofs = new LinkedList<>();
 
     public static int incomingPort = 4000;
 
@@ -58,15 +58,14 @@ public class Car {
         serverSignPublicKey = serverKeys[0];
         serverCipherPublicKey = serverKeys[1];
 
-        Request request = new Request(id, "request_timestamp");
-        request.setProverID(id);
-        request.setLocation(this.getLocation());
+        MillenniumFalcon payload = new MillenniumFalcon(id, "request_timestamp");
+        payload.setLocation(this.getLocation());
 
         hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
-        hs.send(request);
+        hs.send(payload);
         System.out.println("Prover - Request of timestamp sent to server");
-        Request response = hs.receive();
+        MillenniumFalcon response = hs.receive();
         hs.closeSocket();
 
         if (response != null) {
@@ -86,14 +85,14 @@ public class Car {
                     while (true) {
                         Socket socket = ss.accept();
                         hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
-                        Request request = hs.receive();
-                        if (request.getType().equals("Certificate") && request.getCertificate() != null) {
-                            if (AsymmetricKeyPair.verifySignature(serverSignPublicKey, request.getCertificateSignature(), request.getCertificate())) {
+                        MillenniumFalcon payload = hs.receive();
+                        if (payload.getType().equals("Certificate") && payload.getCertificate() != null) {
+                            if (AsymmetricKeyPair.verifySignature(serverSignPublicKey, payload.getCertificateSignature(), payload.getCertificate())) {
                                 System.out.println("\u001B[42m" + "Prover - Received valid certificate" + "\u001B[0m");
                             } else {
                                 System.err.println("Certificate signature not valid");
                             }
-                        } else if (request.getType().equals("Not approved")) {
+                        } else if (payload.getType().equals("Not approved")) {
                             System.err.println("Certificate not approved");
                         } else {
                             System.err.println("Invalid type");
@@ -125,10 +124,10 @@ public class Car {
             hs = new HybridCipher(signingPair, cipherPair, serverSignPublicKey, serverCipherPublicKey, socket);
 
             System.out.println("Witness - Send proof to server");
-            Request request = witness_requests.pop();
-            request.setSender(id, "witness_proof");
-            request.setLocation(getLocation());
-            hs.send(request);
+            MillenniumFalcon payload = witnessProofs.pop();
+            payload.setSender(id, "witness_proof");
+            payload.setLocation(getLocation());
+            hs.send(payload);
             hs.closeSocket();
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,11 +164,11 @@ public class Car {
         }.start();
     }
 
-    public void addRequest(Request r) {
-        witness_requests.add(r);
+    public void addProof(MillenniumFalcon r) {
+        witnessProofs.add(r);
     }
 
-    public void requestWitness(Request r, Simulator sim) throws IOException, ClassNotFoundException {
+    public void requestWitness(MillenniumFalcon r, Simulator sim) throws IOException, ClassNotFoundException {
         HashMap<Integer, Car> witnesses = sim.findWitnesses(3000);
         for (int port : witnesses.keySet()) {
             String host = witnesses.get(port).getHost();

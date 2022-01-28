@@ -10,7 +10,7 @@ public class Server {
     private AsymmetricKeyPair cipherPair;
     private ServerSocket serverSocket;
     private UUID id;
-    private HashMap<UUID, LinkedList<Request>> witnessReport;
+    private HashMap<UUID, LinkedList<MillenniumFalcon>> witnessReport;
 
     public static final int serverPort = 2000;
     public static final String serverHost = "localhost";
@@ -27,18 +27,18 @@ public class Server {
         witnessReport = new HashMap<>();
     }
 
-    public synchronized LinkedList<Request> getRequestsFromProver(UUID proverID) {
-        LinkedList<Request> requests = witnessReport.get(proverID);
+    public synchronized LinkedList<MillenniumFalcon> getRequestsFromProver(UUID proverID) {
+        LinkedList<MillenniumFalcon> requests = witnessReport.get(proverID);
         return requests;
     }
 
-    public synchronized void addWitnessReport(UUID proverID, Request r) {
+    public synchronized void addWitnessReport(UUID proverID, MillenniumFalcon r) {
         if (witnessReport.containsKey(proverID)) {
-            LinkedList<Request> lst = witnessReport.get(proverID);
+            LinkedList<MillenniumFalcon> lst = witnessReport.get(proverID);
             lst.add(r);
             witnessReport.put(proverID, lst);
         } else {
-            LinkedList<Request> requests = new LinkedList<>();
+            LinkedList<MillenniumFalcon> requests = new LinkedList<>();
             requests.add(r);
             witnessReport.put(proverID, requests);
         }
@@ -53,16 +53,16 @@ public class Server {
         return cipherPair.getPublicKey();
     }
 
-    public void sendCertificate(UUID id, Boolean valid) {
+    public void sendCertificate(UUID id, Boolean valid, Location loc) {
         try {
             Socket socket = new Socket("localhost", Car.incomingPort);
 
             Key[] carKeys = Simulator.readPublicKeys(id);
             HybridCipher hs = new HybridCipher(signPair, cipherPair, carKeys[0], carKeys[1], socket);
-            Request request = new Request(this.id, "Certificate");
+            MillenniumFalcon request = new MillenniumFalcon(this.id, "Certificate");
             if (valid) {
                 Timestamp ts = new Timestamp(System.currentTimeMillis());
-                String certificate = ts + "__" + carKeys[0] + "__APPROVED_BY_" + signPair.getPublicKey();
+                String certificate = "CERTIFICATE_TIME:" + ts + "_LOC:" + loc.toString() + "_TO:" + carKeys[0].toString() + "_APPROVED_BY:" + signPair.getPublicKey();
                 request.setCertificate(certificate, signPair.sign(certificate));
             } else {
                 request.setType("Not approved");

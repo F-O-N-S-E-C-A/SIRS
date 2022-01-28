@@ -1,5 +1,6 @@
 import java.net.Socket;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 public class Handler implements Runnable {
     private Socket socket;
@@ -15,22 +16,27 @@ public class Handler implements Runnable {
 
     public void run() {
         try {
-            Request request = hs.receive();
+            MillenniumFalcon payload = hs.receive();
 
-            if (request.getType().equals("witness_proof")){
+            if (payload.getType().equals("witness_proof")){
                 System.out.println("Server Handler - witness report received");
-                server.addWitnessReport(request.getProverID(), request);
 
-            } else if (request.getType().equals("request_timestamp")){
+                UUID proverID = (UUID) HybridCipher.deserialize(server.getCipherPair().decipher(payload.getProverID()));
+                server.addWitnessReport(proverID, payload);
+
+            } else if (payload.getType().equals("request_timestamp")){
                 System.out.println("Server Handler - request timestamp received from prover");
-                Location proverLoc = request.getLocation();
-                request.setLocation(null);
+                Location proverLoc = payload.getLocation();
+                payload.setLocation(null);
                 Timestamp ts = new Timestamp(System.currentTimeMillis());
-                request.setTimeStamp(ts);
-                request.signTimestamp(server.getSignPair().sign(ts));
-                request.setId(server.getID());
-                hs.send(request);
-                new Thread(new WaitForWitnesses(request.getProverID(), server, proverLoc)).start();
+                payload.setTimeStamp(ts);
+                payload.signTimestamp(server.getSignPair().sign(ts));
+                UUID proverID = payload.getId();
+                byte[] cipheredPorverID = Cipher.asymmetricCipher(HybridCipher.serialize(proverID), server.getCipherPublicKey());
+                payload.setProverID(cipheredPorverID);
+                payload.setId(server.getID());
+                hs.send(payload);
+                new Thread(new WaitForWitnesses(proverID, server, proverLoc)).start();
 
             } else {
                 System.err.println("Type not specified");
