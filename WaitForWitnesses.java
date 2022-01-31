@@ -19,8 +19,9 @@ public class WaitForWitnesses implements Runnable{
 
     public void run() {
         try {
+            System.out.println("Server - Begin timeout: " + TIMEOUT/1000 + "s");
             Thread.sleep(TIMEOUT);
-
+            System.out.println("Server - End of timeout, processing request");
             LinkedList<MillenniumFalcon> reports = server.getRequestsFromProver(proverID);
             Timestamp currentTime = new Timestamp(System.currentTimeMillis());
             if(reports != null) {

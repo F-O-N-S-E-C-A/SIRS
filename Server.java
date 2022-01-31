@@ -64,6 +64,7 @@ public class Server {
                 Timestamp ts = new Timestamp(System.currentTimeMillis());
                 String certificate = "CERTIFICATE_TIME:" + ts + "_LOC:" + loc.toString() + "_TO:" + carKeys[0].toString() + "_APPROVED_BY:" + signPair.getPublicKey();
                 request.setCertificate(certificate, signPair.sign(certificate));
+                System.out.println("Server - Certificate sent to Prover");
             } else {
                 request.setType("Not approved");
             }

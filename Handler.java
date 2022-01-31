@@ -19,13 +19,13 @@ public class Handler implements Runnable {
             MillenniumFalcon payload = hs.receive();
 
             if (payload.getType().equals("witness_proof")){
-                System.out.println("Server Handler - witness report received");
+                System.out.println("Server - witness report received");
 
                 UUID proverID = (UUID) HybridCipher.deserialize(server.getCipherPair().decipher(payload.getProverID()));
                 server.addWitnessReport(proverID, payload);
 
             } else if (payload.getType().equals("request_timestamp")){
-                System.out.println("Server Handler - request timestamp received from prover");
+                System.out.println("Server - request timestamp received from prover");
                 Location proverLoc = payload.getLocation();
                 payload.setLocation(null);
                 Timestamp ts = new Timestamp(System.currentTimeMillis());
@@ -36,6 +36,7 @@ public class Handler implements Runnable {
                 payload.setProverID(cipheredPorverID);
                 payload.setId(server.getID());
                 hs.send(payload);
+                System.out.println("Server - timestamp sent to prover");
                 new Thread(new WaitForWitnesses(proverID, server, proverLoc)).start();
 
             } else {

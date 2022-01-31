@@ -55,7 +55,6 @@ public class HybridCipher {
         if (sessionKey == null){
             try {
                 generateKey();
-                //freshness TODO
                 byte[] signature = signingPair.sign(sessionKey);
                 byte[] cipheredSK = Cipher.asymmetricCipher(serialize(sessionKey), recv_cipher_pub);
                 CipheredObject cipheredKey = new CipheredObject(cipheredSK);
